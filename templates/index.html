@@ -1,0 +1,226 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>EarningsVol</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1e293b, #020617 60%, #020617);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 flex flex-col">
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-950/70 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="bg-gradient-to-br from-emerald-400 to-cyan-500 p-2 rounded-lg shadow-lg shadow-emerald-500/20">
+          <!-- Simple bar chart icon mimic -->
+          <div class="w-5 h-5 flex items-end gap-[2px] text-white">
+            <span class="inline-block bg-white/90 w-[3px] h-2 rounded-sm"></span>
+            <span class="inline-block bg-white/90 w-[3px] h-3 rounded-sm"></span>
+            <span class="inline-block bg-white/90 w-[3px] h-4 rounded-sm"></span>
+          </div>
+        </div>
+        <h1 class="text-xl font-bold text-white tracking-tight">
+          Earnings<span class="text-emerald-400">Vol</span>
+        </h1>
+      </div>
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400">
+        <!--
+        <a href="#" class="hover:text-white transition-colors">Dashboard</a>
+        <a href="#" class="hover:text-white transition-colors">Markets</a>
+        <a href="#" class="hover:text-white transition-colors">Learn</a>
+        -->
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <!-- Hero -->
+    <div class="text-center mb-12">
+      <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
+        Earnings Volatility using
+        <span class="text-emerald-400">Yahoo Finance</span>
+      </h2>
+      <p class="text-slate-400 max-w-2xl mx-auto text-sm md:text-base">
+        Analyze how a stock behaves around its earnings dates using Yahoo Finance data.<br>
+        Based on earnings dates and the surrounding daily open/close data.
+      </p>
+    </div>
+
+    <!-- Form Card -->
+    <section class="bg-slate-900/70 border border-slate-700 rounded-2xl shadow-xl p-6 md:p-8 mb-10">
+      <form method="POST" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Ticker -->
+          <div>
+            <label class="block text-sm font-medium text-slate-400 mb-2 flex items-center gap-2">
+              <span class="inline-block w-4 h-4 rounded-full bg-emerald-400/80"></span>
+              Ticker
+            </label>
+            <div class="relative">
+              <input
+                name="ticker"
+                value="{{ params.ticker }}"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/70 focus:border-emerald-500 placeholder-slate-500"
+                placeholder="AAPL"
+                required
+              />
+              <div class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs">
+                NYSE/NAS
+              </div>
+            </div>
+          </div>
+
+          <!-- Cycles -->
+          <div>
+            <label class="block text-sm font-medium text-slate-400 mb-2 flex items-center gap-2">
+              <span class="inline-block w-4 h-4 rounded-full bg-cyan-400/80"></span>
+              Earnings Cycles
+            </label>
+            <select
+              name="cycles"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/70 focus:border-emerald-500 appearance-none cursor-pointer hover:bg-slate-800 transition-colors"
+            >
+              {% for num in [1, 2, 3, 4, 5, 6, 7, 8, 9] %}
+              <option value="{{ num }}" {% if params.cycles == num %}selected{% endif %}>{{ num }} Cycles</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Days -->
+          <div>
+            <label class="block text-sm font-medium text-slate-400 mb-2 flex items-center gap-2">
+              <span class="inline-block w-4 h-4 rounded-full bg-indigo-400/80"></span>
+              Days Range (+/-)
+            </label>
+            <select
+              name="days"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/70 focus:border-emerald-500 appearance-none cursor-pointer hover:bg-slate-800 transition-colors"
+            >
+              {% for num in [3, 5, 7, 10, 14, 21] %}
+              <option value="{{ num }}" {% if params.days == num %}selected{% endif %}>±{{ num }} days</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button
+            type="submit"
+            class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-400 to-cyan-500 text-slate-950 font-semibold px-5 py-2.5 rounded-lg shadow-lg shadow-emerald-500/30 hover:shadow-emerald-400/40 hover:-translate-y-0.5 transition-all text-sm"
+          >
+            Analyze Stock
+          </button>
+        </div>
+      </form>
+
+      {% if error %}
+      <p class="mt-4 text-sm text-red-400">{{ error }}</p>
+      {% endif %}
+    </section>
+
+    {% if not cycles_data and not error %}
+    <!-- Empty state -->
+    <div class="flex flex-col items-center justify-center py-20 opacity-50">
+      <div class="text-slate-700 mb-4">
+        <!-- dashboard icon mimic -->
+        <div class="w-16 h-16 rounded-2xl border border-slate-700 flex items-center justify-center">
+          <div class="w-10 h-10 border-2 border-slate-600 rounded-xl"></div>
+        </div>
+      </div>
+      <p class="text-slate-500 text-sm">Enter a ticker above to begin analysis</p>
+    </div>
+    {% endif %}
+
+    {% if cycles_data %}
+    <!-- Summary + Stats -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+      <div class="lg:col-span-2 bg-slate-900/70 p-6 rounded-xl border border-slate-700 shadow-lg">
+        <h2 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+          <span class="text-emerald-400">Historical</span> Earnings Insight
+        </h2>
+        <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+          {{ summary.ticker }} shows an average move of
+          <span class="font-semibold text-emerald-400">
+            ±{{ "%.2f"|format(summary.avg_abs_move) }}%
+          </span>
+          around earnings day in the last {{ summary.cycles }} cycles.
+          Out of these, {{ summary.positive }} / {{ summary.total }} cycles had a positive move. <br>
+          Moves are calculated between day close before earnings report and first day close after earnings report.
+        </p>
+      </div>
+
+      <div class="bg-slate-900/70 p-6 rounded-xl border border-slate-700 shadow-lg flex flex-col justify-center space-y-3">
+        <div>
+          <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Avg. Net Move After Earnings</div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl font-bold">±{{ "%.2f"|format(summary.avg_abs_move) }}%</span>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Positive Cycles</div>
+          <div class="text-lg">
+            {{ summary.positive }} / {{ summary.total }}
+          </div>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Window</div>
+          <div class="text-sm text-slate-300">±{{ summary.days }} calendar days around each earnings date</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Per-cycle cards -->
+    <section class="space-y-6">
+      {% for c in cycles_data %}
+      <div class="bg-slate-900/80 border border-slate-700 rounded-2xl p-6 md:p-7 shadow-lg">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+          <div>
+            <h3 class="text-lg font-semibold text-white">
+              Earnings cycle – {{ c.date.year }} Q{{ ((c.date.month - 1) // 3) + 1 }}
+            </h3>
+            <p class="text-xs text-slate-400 mt-1 uppercase tracking-wide">
+              Move: {{ "%.2f"|format(c.move_pct) }}%
+            </p>
+          </div>
+          <div class="flex gap-3 text-xs text-slate-400">
+            <div class="px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700">
+              Window ±{{ summary.days }} days
+            </div>
+            <div class="px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700">
+              Yahoo Finance data
+            </div>
+          </div>
+        </div>
+        <div class="border border-slate-800 rounded-xl overflow-hidden bg-slate-950/60">
+          <img
+            src="data:image/png;base64,{{ c.img_b64 }}"
+            alt="Price chart around earnings"
+            class="w-full"
+          />
+        </div>
+      </div>
+      {% endfor %}
+    </section>
+    {% endif %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 mt-10 py-8 bg-slate-950">
+    <div class="max-w-7xl mx-auto px-4 text-center text-slate-500 text-xs md:text-sm">
+      <p>© {{ now().year if now else 2025 }} EarningsVol. Made by Ron Maor.</p>
+      <p class="mt-2 opacity-60">
+        Fun & educational use only. Not financial advice.
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
