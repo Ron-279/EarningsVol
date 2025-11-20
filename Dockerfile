@@ -1,31 +1,25 @@
-# Use a slim Python image
-FROM python:3.11-slim
+# Use official Python base image
+FROM python:3.10-slim
 
-# Don't buffer Python output (good for logs)
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
-
-# Install system deps (for matplotlib, etc.)
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install system-level dependencies required for lxml and pandas
+RUN apt-get update && apt-get install -y \
     build-essential \
-    libfreetype6-dev \
-    libpng-dev \
+    libxml2-dev \
+    libxslt-dev \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Set work directory
 WORKDIR /app
 
-# Copy dependency list and install
-COPY requirements.txt /app/
+# Copy requirement list
+COPY requirements.txt .
 
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the app (including templates/)
-COPY . /app
+# Copy app files
+COPY . .
 
-# Cloud Run will inject $PORT, but default to 8080
+# Expose port
 ENV PORT=8080
-
-# Use gunicorn to serve the Flask app
-# "app:app" = app.py (module) : app (Flask instance)
-CMD exec gunicorn --bind :$PORT --workers 2 --threads 4 app:app
+CMD ["python", "app.py"]
