@@ -32,6 +32,17 @@ The application runs a Python backend and is deployed on **Google Cloud Run**.
 
 ---
 
+## **Check it Out**
+
+
+<div align="center">
+
+[![Open App](https://img.shields.io/badge/OPEN_APP-EarningsVol-success?style=for-the-badge&logo=google-cloud&logoColor=white)](https://bit.ly/3XIjsEA)
+
+</div>
+
+---
+
 ## **Screenshot**
 
 <div align="center">
